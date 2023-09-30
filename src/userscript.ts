@@ -8,6 +8,34 @@
 // @grant        none
 // ==/UserScript==
 
+class HeadlessYT {
+  socket!: WebSocket;
+
+  // Create WebSocket and connect to URL 
+  connect(url: string) {
+    this.socket = new WebSocket(url);
+    this.register_events();
+  }
+
+  register_events() {
+    // Listen for message events
+    this.socket.addEventListener('open', this.on_open);
+    this.socket.addEventListener('message', this.on_message);
+  }
+
+  on_message(event: MessageEvent) {
+    const command: string = event.data;
+    console.log(command);
+  }
+
+  on_open() {
+    console.log('[ HeadlessYT ]: Connected to server.')
+  }
+}
+
+
 (function() {
     'use strict';
+    const hyt = new HeadlessYT();
+    hyt.connect('ws://localhost:3000');
 })();
