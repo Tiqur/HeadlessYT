@@ -1,0 +1,14 @@
+{
+  "name": "headlessyt",
+  "version": "1.0.0",
+  "main": "src/userscript.ts",
+  "scripts": {
+    "build": "tsc"
+  },
+  "author": "",
+  "license": "ISC",
+  "description": "",
+  "devDependencies": {
+    "typescript": "^5.2.2"
+  }
+}
