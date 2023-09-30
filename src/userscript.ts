@@ -31,16 +31,32 @@ class HeadlessYT {
       case "pause-play":
         send_keycode(32);
         break;
+      case "mute":
+        send_keycode(77);
+        break;
+      case "volume_up":
+        send_keycode(38);
+        break;
+      case "volume_down":
+        send_keycode(40);
+        break;
+      case "next_video":
+        send_keycode(78, true);
+        break;
+      case "prev_video":
+        send_keycode(80, true);
+        break;
+
     }
   }
 
   on_open() {
-    console.log('[ HeadlessYT ]: Connected to server.')
+    console.log('[ HeadlessYT ]: Connected to server.');
   }
 }
 
-function send_keycode(keyCode: number) {
-  document.dispatchEvent(new KeyboardEvent('keydown', { keyCode }))
+function send_keycode(keyCode: number, shiftKey: boolean = false) {
+  document.dispatchEvent(new KeyboardEvent('keydown', { keyCode, shiftKey }));
 }
 
 
