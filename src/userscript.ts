@@ -28,6 +28,7 @@ class HeadlessYT {
     console.log(command);
 
     switch (command) {
+      // Stateless
       case "pause-play":
         send_keycode(32);
         break;
@@ -47,6 +48,23 @@ class HeadlessYT {
         send_keycode(80, true);
         break;
 
+
+      // Stateful
+      case "enable_shuffle":
+        //document.querySelector('[aria-label="Shuffle playlist"]');
+        break;
+      case "disable_shuffle":
+        //document.querySelector('[aria-label="Shuffle playlist"]');
+        break;
+      case "loop_video":
+        //document.querySelector('[aria-label="Loop playlist"], [aria-label="Loop video"], [aria-label="Turn off loop"]');
+        break;
+      case "loop_playlist":
+        //document.querySelector('[aria-label="Loop playlist"], [aria-label="Loop video"], [aria-label="Turn off loop"]');
+        break;
+      case "disable_loop":
+        //document.querySelector('[aria-label="Loop playlist"], [aria-label="Loop video"], [aria-label="Turn off loop"]');
+        break;
     }
   }
 
