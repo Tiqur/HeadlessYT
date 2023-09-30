@@ -74,7 +74,7 @@ class HeadlessYT {
 }
 
 function send_keycode(keyCode: number, shiftKey: boolean = false) {
-  document.dispatchEvent(new KeyboardEvent('keydown', { keyCode, shiftKey }));
+  document.getElementById('movie_player')?.dispatchEvent(new KeyboardEvent('keydown', { keyCode, shiftKey }));
 }
 
 
