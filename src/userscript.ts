@@ -26,11 +26,21 @@ class HeadlessYT {
   on_message(event: MessageEvent) {
     const command: string = event.data;
     console.log(command);
+
+    switch (command) {
+      case "pause-play":
+        send_keycode(32);
+        break;
+    }
   }
 
   on_open() {
     console.log('[ HeadlessYT ]: Connected to server.')
   }
+}
+
+function send_keycode(keyCode: number) {
+  document.dispatchEvent(new KeyboardEvent('keydown', { keyCode }))
 }
 
 
