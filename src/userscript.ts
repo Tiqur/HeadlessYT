@@ -1,7 +1,7 @@
 // ==UserScript==
 // @name         HeadlessYT
 // @version      0.1
-// @description  A simple script to expose an API for the youtube media player.
+// @description  A simple script to expose an API for the YouTube media player.
 // @author       TrevorBrage
 // @match        https://www.youtube.com/watch?v=*
 // @icon         https://www.google.com/s2/favicons?sz=64&domain=youtube.com
@@ -10,13 +10,18 @@
 
 class HeadlessYT {
   url!: string;
-  socket!: WebSocket;
+  socket!: WebSocket | null; // Initialize socket as null
   seconds_since_last_heartbeat: number = 0;
   heartbeat_interval!: number;
 
-  // Create WebSocket and connect to URL 
-  connect() {
+  constructor() {
     console.log("HeadlessYT");
+    this.socket = null; // Initialize socket as null
+    this.register_heartbeat_reciever();
+  }
+
+  // Create WebSocket and connect to URL
+  connect() {
     this.socket = new WebSocket(this.url);
     this.register_events();
   }
@@ -27,8 +32,24 @@ class HeadlessYT {
 
   register_events() {
     // Listen for message events
-    this.socket.addEventListener('open', () => this.on_open());
-    this.socket.addEventListener('message', (evt) => this.on_message(evt));
+    if (this.socket) {
+      this.socket.addEventListener('open', () => this.on_open());
+      this.socket.addEventListener('message', (evt) => this.on_message(evt));
+
+      // Handle WebSocket close event
+      this.socket.addEventListener('close', (event) => {
+        console.log('WebSocket closed:', event.reason);
+
+        // Clear the previous heartbeat_interval
+        clearInterval(this.heartbeat_interval);
+
+        // Attempt to reconnect after a delay
+        setTimeout(() => {
+          console.log("Attempting to reconnect...");
+          this.connect();
+        }, 15000); // Delay for 15 seconds before reconnecting
+      });
+    }
   }
 
   register_heartbeat_reciever()  {
@@ -44,21 +65,16 @@ class HeadlessYT {
         this.seconds_since_last_heartbeat = 0;
 
         // If socket still open, close it
-        console.log("Disconnecting...");
-        this.socket.close();
-
-        // Clear interval
-        clearInterval(this.heartbeat_interval);
-
-        // Try to connect again
-        console.log("Attempting to reconnect...");
-        this.connect();
+        if (this.socket && this.socket.readyState === WebSocket.OPEN) {
+          console.log("Disconnecting...");
+          this.socket.close();
+        }
       }
     }, 1000)
   }
 
   handle_ping() {
-    console.log('Recieved ping.')
+    console.log('Received ping.')
     this.seconds_since_last_heartbeat = 0;
   }
 
@@ -116,7 +132,6 @@ class HeadlessYT {
 
   on_open() {
     console.log('[ HeadlessYT ]: Connected to server.');
-    this.register_heartbeat_reciever();
   }
 }
 
@@ -124,10 +139,9 @@ function send_keycode(keyCode: number, shiftKey: boolean = false) {
   document.getElementById('movie_player')?.dispatchEvent(new KeyboardEvent('keydown', { keyCode, shiftKey }));
 }
 
-
 (function() {
-    'use strict';
-    const hyt = new HeadlessYT();
-    hyt.set_url('ws://localhost:3000')
-    hyt.connect();
+  'use strict';
+  const hyt = new HeadlessYT();
+  hyt.set_url('ws://localhost:3000');
+  hyt.connect();
 })();
