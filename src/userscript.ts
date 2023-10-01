@@ -9,24 +9,59 @@
 // ==/UserScript==
 
 class HeadlessYT {
+  url!: string;
   socket!: WebSocket;
+  seconds_since_last_heartbeat: number = 0;
+  heartbeat_interval!: number;
 
   // Create WebSocket and connect to URL 
-  connect(url: string) {
-    this.socket = new WebSocket(url);
+  connect() {
+    console.log("HeadlessYT");
+    this.socket = new WebSocket(this.url);
     this.register_events();
+  }
+
+  set_url(url: string) {
+    this.url = url;
   }
 
   register_events() {
     // Listen for message events
-    this.socket.addEventListener('open', this.on_open);
+    this.socket.addEventListener('open', () => this.on_open());
     this.socket.addEventListener('message', this.on_message);
   }
 
-  on_message(event: MessageEvent) {
-    const command: string = event.data;
-    console.log(command);
+  register_heartbeat_reciever()  {
+    console.log("Registering heartbeat handler");
 
+    this.heartbeat_interval = setInterval(async () => {
+      // Increment
+      this.seconds_since_last_heartbeat++;
+      console.log(`Seconds since last heartbeat: ${this.seconds_since_last_heartbeat}`);
+
+      // If last ping was > 10 seconds ago, close connection and try to reconnect
+      if (this.seconds_since_last_heartbeat > 10) {
+        this.seconds_since_last_heartbeat = 0;
+
+        // If socket still open, close it
+        console.log("Disconnecting...");
+        this.socket.close();
+
+        // Clear interval
+        clearInterval(this.heartbeat_interval);
+
+        // Try to connect again
+        console.log("Attempting to reconnect...");
+        this.connect();
+      }
+    }, 1000)
+  }
+
+  handle_ping() {
+    this.seconds_since_last_heartbeat = 0;
+  }
+
+  handle_command(command: string) {
     switch (command) {
       // Stateless
       case "pause-play":
@@ -68,8 +103,19 @@ class HeadlessYT {
     }
   }
 
+  on_message(event: MessageEvent) {
+    const message = event.data;
+
+    if (message == 'ping') {
+      this.handle_ping();
+    } else {
+      this.handle_command(message);
+    }
+  }
+
   on_open() {
     console.log('[ HeadlessYT ]: Connected to server.');
+    this.register_heartbeat_reciever();
   }
 }
 
@@ -81,5 +127,6 @@ function send_keycode(keyCode: number, shiftKey: boolean = false) {
 (function() {
     'use strict';
     const hyt = new HeadlessYT();
-    hyt.connect('ws://localhost:3000');
+    hyt.set_url('ws://localhost:3000')
+    hyt.connect();
 })();
