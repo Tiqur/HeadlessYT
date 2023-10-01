@@ -28,7 +28,7 @@ class HeadlessYT {
   register_events() {
     // Listen for message events
     this.socket.addEventListener('open', () => this.on_open());
-    this.socket.addEventListener('message', this.on_message);
+    this.socket.addEventListener('message', (evt) => this.on_message(evt));
   }
 
   register_heartbeat_reciever()  {
@@ -39,8 +39,8 @@ class HeadlessYT {
       this.seconds_since_last_heartbeat++;
       console.log(`Seconds since last heartbeat: ${this.seconds_since_last_heartbeat}`);
 
-      // If last ping was > 10 seconds ago, close connection and try to reconnect
-      if (this.seconds_since_last_heartbeat > 10) {
+      // If last ping was > 15 seconds ago, close connection and try to reconnect
+      if (this.seconds_since_last_heartbeat > 15) {
         this.seconds_since_last_heartbeat = 0;
 
         // If socket still open, close it
@@ -58,6 +58,7 @@ class HeadlessYT {
   }
 
   handle_ping() {
+    console.log('Recieved ping.')
     this.seconds_since_last_heartbeat = 0;
   }
 
@@ -103,8 +104,8 @@ class HeadlessYT {
     }
   }
 
-  on_message(event: MessageEvent) {
-    const message = event.data;
+  on_message(evt) {
+    const message = evt.data;
 
     if (message == 'ping') {
       this.handle_ping();
