@@ -47,7 +47,7 @@ class HeadlessYT {
         setTimeout(() => {
           console.log("Attempting to reconnect...");
           this.connect();
-        }, 15000); // Delay for 15 seconds before reconnecting
+        }, 5000);
       });
     }
   }
